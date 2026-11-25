@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.1
+
+- While items wait, the menu bar icon and count take a colour, blue to begin with. Choose
+  another, or the menu bar's own, in Settings → General.
+
 ## 0.1.0
 
 First version.

@@ -20,7 +20,7 @@ lists the items without opening the website, and moves each one on when you appr
   <img src="docs/screenshots/label.png" width="54" alt="The menu bar label: three columns of cards with a tick, and a count">
 </p>
 
-Version 0.1.0. A personal tool, not affiliated with or endorsed by Plane.
+Version 0.1.1. A personal tool, not affiliated with or endorsed by Plane.
 
 ## What it does
 
@@ -29,7 +29,8 @@ Version 0.1.0. A personal tool, not affiliated with or endorsed by Plane.
 | <img src="docs/screenshots/menu-expanded.png" width="330" alt="The menu with one item opened to show its description, priority, label and module"> | <img src="docs/screenshots/menu-approved.png" width="330" alt="The menu after approving an item, with Undo at the foot"> |
 
 - **A count in the menu bar:** the items in the phases you watch. With none, the icon
-  stands alone; it dims when there is no key or Plane cannot be reached.
+  stands alone; it dims when there is no key or Plane cannot be reached. While items
+  wait, icon and count take a colour you choose in Settings → General.
 - **A card per phase,** in the order of Plane's states. Inside a card, items are grouped by
   project when more than one has any, most recently changed first.
 - **Details in place:** a click on a row shows the description, priority, labels and module.
@@ -84,7 +85,7 @@ the workspace name. A key added there with `security add-generic-password -s pla
 
 | Page | Holds |
 | --- | --- |
-| General | Launch at login, how often to refresh, notifications, and the shortcut. |
+| General | Launch at login, how often to refresh, notifications, the colour while items wait, and the shortcut. |
 | Account | The API key, the workspace, and a connection test. |
 | Projects | Which projects to watch. |
 | Phases | Which phases to watch: every state name in the chosen projects, matched by name across them. |

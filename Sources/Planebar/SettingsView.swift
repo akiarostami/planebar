@@ -223,6 +223,39 @@ private struct PhasesPage: View {
     }
 }
 
+/// A row of swatches, the first being the menu bar's own colour, then a picker for any other.
+private struct ColourChoice: View {
+    @Binding var value: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(LabelColour.presets, id: \.name) { preset in
+                Button { value = preset.name } label: {
+                    Circle()
+                        .fill(Color(nsColor: preset.colour))
+                        .frame(width: 16, height: 16)
+                        .overlay {
+                            Circle().strokeBorder(Color.primary.opacity(value == preset.name ? 0.9 : 0.15),
+                                                  lineWidth: value == preset.name ? 2 : 1)
+                                .padding(-3)
+                                .opacity(value == preset.name ? 1 : 0)
+                        }
+                        .overlay { Circle().strokeBorder(Color.primary.opacity(0.15)) }
+                        .padding(3)
+                }
+                .buttonStyle(.plain)
+                .help(preset.name == "plain" ? "Menu bar colour" : preset.name.capitalized)
+            }
+            ColorPicker("", selection: Binding(
+                get: { Color(nsColor: LabelColour.colour(for: value)) },
+                set: { value = LabelColour.hex(NSColor($0)) }
+            ), supportsOpacity: false)
+            .labelsHidden()
+            .help("Another colour")
+        }
+    }
+}
+
 private struct GeneralPage: View {
     @Environment(AppModel.self) private var model
     @State private var launchAtLogin = false
@@ -242,6 +275,9 @@ private struct GeneralPage: View {
                     Text("15 minutes").tag(15)
                 }
                 Toggle("Notify when an item arrives", isOn: $model.notifies)
+                LabeledContent("Colour when items wait") {
+                    ColourChoice(value: $model.labelColour)
+                }
             }
 
             Section {

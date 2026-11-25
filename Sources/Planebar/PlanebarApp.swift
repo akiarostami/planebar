@@ -61,7 +61,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func trackLabel() {
         withObservationTracking {
             statusItem.button?.image = Self.label(count: model.hasKey ? model.count : nil,
-                                                  stale: { if case .failed = model.connection { return true }; return false }())
+                                                  stale: { if case .failed = model.connection { return true }; return false }(),
+                                                  waiting: LabelColour.colour(for: model.labelColour))
         } onChange: { [weak self] in
             Task { @MainActor in self?.trackLabel() }
         }
@@ -71,7 +72,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     /// slot, and the number of items in the watched phases when there are any. It is drawn
     /// each time it is shown, so it takes the menu bar's own text colour. The glyph alone
     /// means nothing is waiting; a dimmed glyph means no key, or Plane cannot be reached.
-    static func label(count: Int?, stale: Bool = false) -> NSImage {
+    /// While items wait, glyph and count take the `waiting` colour.
+    static func label(count: Int?, stale: Bool = false, waiting: NSColor = .labelColor) -> NSImage {
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         let connected = count != nil && !stale
         let text = count.flatMap { $0 > 0 ? "\($0)" as NSString : nil }
@@ -80,7 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let textWidth = text.map { ceil($0.size(withAttributes: [.font: font]).width) } ?? 0
         let width = symbolSize + (text == nil ? 0 : gap + textWidth)
         let image = NSImage(size: NSSize(width: width, height: 18), flipped: false) { rect in
-            let colour = connected ? NSColor.labelColor : NSColor.tertiaryLabelColor
+            let colour = !connected ? NSColor.tertiaryLabelColor : text == nil ? NSColor.labelColor : waiting
             Self.drawGlyph(in: NSRect(x: 0, y: (rect.height - 13.4) / 2, width: symbolSize, height: 13.4),
                            colour: colour)
             if let text {
@@ -316,7 +318,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             // The menu bar label and a banner, drawn straight to files.
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                let label = NSImageView(image: Self.label(count: self.model.count))
+                let label = NSImageView(image: Self.label(count: self.model.count, waiting: LabelColour.colour(for: self.model.labelColour)))
                 label.frame = NSRect(origin: .zero, size: label.image?.size ?? .zero)
                 DebugLog.snapshot(label, to: "\(directory)/label.png")
                 if let item = self.model.shownItems.first(where: { !$0.description.isEmpty }) {

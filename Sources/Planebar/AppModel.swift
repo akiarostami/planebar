@@ -96,6 +96,11 @@ final class AppModel {
     var notifies: Bool {
         didSet { save(notifies, "notifies") }
     }
+    /// The menu bar colour while items wait: a name from `LabelColour.presets`, or a hex
+    /// colour such as "#FF8800".
+    var labelColour: String {
+        didSet { save(labelColour, "labelColour") }
+    }
     var hotKey: KeyCombo? {
         didSet { save(hotKey.flatMap { try? JSONEncoder().encode($0) }, "hotKey") }
     }
@@ -133,12 +138,14 @@ final class AppModel {
         } else {
             defaults = .standard
         }
-        defaults.register(defaults: ["workspace": DemoData.isOn ? "acme" : "", "refreshMinutes": 2, "notifies": true])
+        defaults.register(defaults: ["workspace": DemoData.isOn ? "acme" : "", "refreshMinutes": 2, "notifies": true,
+                                     "labelColour": "blue"])
         workspace = defaults.string(forKey: "workspace") ?? ""
         chosenProjects = defaults.stringArray(forKey: "projects")
         chosenPhases = defaults.stringArray(forKey: "phases")
         refreshMinutes = max(1, defaults.integer(forKey: "refreshMinutes"))
         notifies = defaults.bool(forKey: "notifies")
+        labelColour = defaults.string(forKey: "labelColour") ?? "blue"
         hotKey = defaults.data(forKey: "hotKey").flatMap { try? JSONDecoder().decode(KeyCombo.self, from: $0) }
 
         if DemoData.isOn {
