@@ -20,7 +20,7 @@ lists the items without opening the website, and moves each one on when you appr
   <img src="docs/screenshots/label.png" width="54" alt="The menu bar label: three columns of cards with a tick, and a count">
 </p>
 
-Version 0.1.1. A personal tool, not affiliated with or endorsed by Plane.
+Version 0.1.2. A personal tool, not affiliated with or endorsed by Plane.
 
 ## What it does
 
@@ -100,9 +100,9 @@ With the menu open:
 | ↑ ↓ | Move between items |
 | Return or Space | Show or hide the selected item's details |
 | → / ← | Show / hide details |
-| A | Approve the selected item |
+| A | Approve the selected item (change it under Settings → General) |
 | ⌘Z | Undo the approval |
-| O | Open the selected item in Plane |
+| O | Open the selected item in Plane (change it under Settings → General) |
 | ⌘R | Refresh |
 | ⌘, | Settings |
 | ⌘Q | Quit |

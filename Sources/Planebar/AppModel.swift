@@ -104,6 +104,14 @@ final class AppModel {
     var hotKey: KeyCombo? {
         didSet { save(hotKey.flatMap { try? JSONEncoder().encode($0) }, "hotKey") }
     }
+    /// The keys that approve the selected item and open it in Plane while the menu is open;
+    /// nil for none.
+    var approveKey: KeyCombo? {
+        didSet { saveKey(approveKey, "approveKey") }
+    }
+    var openKey: KeyCombo? {
+        didSet { saveKey(openKey, "openKey") }
+    }
 
     /// Set by the app delegate.
     @ObservationIgnored var openSettings: (SettingsPane) -> Void = { _ in }
@@ -147,6 +155,8 @@ final class AppModel {
         notifies = defaults.bool(forKey: "notifies")
         labelColour = defaults.string(forKey: "labelColour") ?? "blue"
         hotKey = defaults.data(forKey: "hotKey").flatMap { try? JSONDecoder().decode(KeyCombo.self, from: $0) }
+        approveKey = Self.loadKey(defaults, "approveKey", default: KeyCombo(keyCode: 0, key: "A"))
+        openKey = Self.loadKey(defaults, "openKey", default: KeyCombo(keyCode: 31, key: "O"))
 
         if DemoData.isOn {
             chosenPhases = ["In Progress", "Review"]
@@ -162,6 +172,30 @@ final class AppModel {
 
     private func save(_ value: Any?, _ key: String) {
         defaults.set(value, forKey: key)
+    }
+
+    /// Saves a menu key; a removed key is stored as empty data, so it is not replaced by the
+    /// default on the next launch.
+    private func saveKey(_ combo: KeyCombo?, _ key: String) {
+        defaults.set(combo.flatMap { try? JSONEncoder().encode($0) } ?? Data(), forKey: key)
+    }
+
+    private static func loadKey(_ defaults: UserDefaults, _ key: String, default fallback: KeyCombo) -> KeyCombo? {
+        guard let data = defaults.data(forKey: key) else { return fallback }
+        return try? JSONDecoder().decode(KeyCombo.self, from: data)
+    }
+
+    /// Why a key cannot be used for approving or opening, or nil when it can: the menu's
+    /// fixed keys, and the other action's key, are taken.
+    func refuseMenuKey(_ combo: KeyCombo, for action: String) -> String? {
+        let flags = NSEvent.ModifierFlags(rawValue: combo.modifiers)
+        let fixedPlain: Set<UInt32> = [123, 124, 125, 126, 36, 76, 49, 53]  // arrows, Return, Enter, Space, Esc
+        let fixedCommand: Set<UInt32> = [43, 6, 15, 12]                      // ⌘, ⌘Z ⌘R ⌘Q
+        if flags.isEmpty, fixedPlain.contains(combo.keyCode) { return "Used by the menu" }
+        if flags == .command, fixedCommand.contains(combo.keyCode) { return "Used by the menu" }
+        let other = action == "approve" ? openKey : approveKey
+        if other == combo { return action == "approve" ? "Used by Open in Plane" : "Used by Approve" }
+        return nil
     }
 
     // MARK: Key and workspace

@@ -141,6 +141,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func handleKey(_ event: NSEvent) -> Bool {
         guard menu.isShown, event.window === menu.window else { return false }
+        if model.approveKey?.matches(event) == true {
+            model.navigate(.approve)
+            return true
+        }
+        if model.openKey?.matches(event) == true {
+            let opens = model.item(model.selectedRow) != nil
+            model.navigate(.open)
+            if opens { closeMenu() }
+            return true
+        }
         let modifiers = event.modifierFlags.intersection([.command, .control, .option, .shift])
         if modifiers == .command {
             switch event.keyCode {
@@ -160,11 +170,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         case 124: withAnimation(.easeOut(duration: 0.15)) { model.navigate(.right) }
         case 36, 76, 49:                       // Return, Enter, Space
             withAnimation(.easeOut(duration: 0.15)) { model.navigate(.activate) }
-        case 0: model.navigate(.approve)       // A
-        case 31:                               // O
-            let opens = model.item(model.selectedRow) != nil
-            model.navigate(.open)
-            if opens { closeMenu() }
         case 53: closeMenu()                   // Esc
         default: return false
         }

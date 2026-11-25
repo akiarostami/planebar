@@ -233,7 +233,8 @@ private struct ItemRow: View {
                     .buttonStyle(.plain)
                     .foregroundStyle(next == nil ? Color.secondary.opacity(0.4) : Color.secondary)
                     .disabled(next == nil)
-                    .help(next.map { "Approve: move to \($0.name) (A)" } ?? "Nothing comes after \(item.state.name)")
+                    .help(next.map { "Approve: move to \($0.name)" + (model.approveKey.map { " (\($0.display))" } ?? "") }
+                          ?? "Nothing comes after \(item.state.name)")
                     .accessibilityLabel("Approve")
                     Button {
                         model.openInPlane(item)
@@ -245,7 +246,7 @@ private struct ItemRow: View {
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(Color.secondary)
-                    .help("Open in Plane (O)")
+                    .help("Open in Plane" + (model.openKey.map { " (\($0.display))" } ?? ""))
                     .accessibilityLabel("Open in Plane")
                 }
                 Text(Age.short(since: item.updatedAt))

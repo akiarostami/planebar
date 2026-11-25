@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.2
+
+- The keys that approve an item and open it in Plane, A and O to begin with, can be
+  changed or removed in Settings → General.
+
 ## 0.1.1
 
 - While items wait, the menu bar icon and count take a colour, blue to begin with. Choose

@@ -295,6 +295,21 @@ private struct GeneralPage: View {
             }
 
             Section {
+                LabeledContent("Approve") {
+                    ShortcutRecorder(combo: $model.approveKey, allowsPlain: true) {
+                        model.refuseMenuKey($0, for: "approve")
+                    }
+                }
+                LabeledContent("Open in Plane") {
+                    ShortcutRecorder(combo: $model.openKey, allowsPlain: true) {
+                        model.refuseMenuKey($0, for: "open")
+                    }
+                }
+            } header: {
+                Text("Keys in the menu")
+            }
+
+            Section {
                 HStack {
                     Text("Planebar has no Dock icon; quit it here or from its menu.")
                         .font(.callout)

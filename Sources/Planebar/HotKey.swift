@@ -33,14 +33,26 @@ struct KeyCombo: Codable, Equatable {
         return UInt32(carbon)
     }
 
-    /// A combo from a key press, or nil when it has no Control, Option or Command
-    /// (Shift alone would take over ordinary typing).
-    init?(event: NSEvent) {
+    init(keyCode: UInt32, modifiers: NSEvent.ModifierFlags = [], key: String) {
+        self.keyCode = keyCode
+        self.modifiers = modifiers.rawValue
+        self.key = key
+    }
+
+    /// A combo from a key press. A system-wide shortcut needs Control, Option or Command
+    /// (Shift alone would take over ordinary typing), so without one this is nil unless
+    /// `allowsPlain` is set, as for keys used only inside the menu.
+    init?(event: NSEvent, allowsPlain: Bool = false) {
         let flags = event.modifierFlags.intersection(Self.allowed)
-        guard !flags.intersection([.control, .option, .command]).isEmpty else { return nil }
+        guard allowsPlain || !flags.intersection([.control, .option, .command]).isEmpty else { return nil }
         keyCode = UInt32(event.keyCode)
         modifiers = flags.rawValue
         key = Self.name(for: event)
+    }
+
+    /// Whether a key press is this combo, modifiers and all.
+    func matches(_ event: NSEvent) -> Bool {
+        UInt32(event.keyCode) == keyCode && event.modifierFlags.intersection(Self.allowed).rawValue == modifiers
     }
 
     private static let named: [Int: String] = [
@@ -115,6 +127,10 @@ final class HotKeyCenter {
 /// A button that records a shortcut: click it, then press the keys. Esc cancels.
 struct ShortcutRecorder: View {
     @Binding var combo: KeyCombo?
+    /// Accept keys without Control, Option or Command, for keys used only inside the menu.
+    var allowsPlain = false
+    /// Says why a key cannot be used, or nil when it can.
+    var refuse: (KeyCombo) -> String? = { _ in nil }
     @State private var isRecording = false
     @State private var monitor: Any?
     @State private var hint: String?
@@ -149,9 +165,13 @@ struct ShortcutRecorder: View {
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             if Int(event.keyCode) == kVK_Escape {
                 stop()
-            } else if let recorded = KeyCombo(event: event) {
-                combo = recorded
-                stop()
+            } else if let recorded = KeyCombo(event: event, allowsPlain: allowsPlain) {
+                if let reason = refuse(recorded) {
+                    hint = reason
+                } else {
+                    combo = recorded
+                    stop()
+                }
             } else {
                 hint = "Include ⌃, ⌥ or ⌘"
             }
